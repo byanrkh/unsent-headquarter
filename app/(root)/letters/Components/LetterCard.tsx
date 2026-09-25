@@ -23,7 +23,7 @@ export default function LetterCard({
         <p className="text-sm text-[var(--muted)]">
           to <span className="text-[var(--foreground)]">{letter.to_name}</span>
         </p>
-        <p className="font-serif-brand mt-1.5 italic leading-relaxed text-[var(--foreground)]">
+        <p className="font-serif-brand mt-1.5 break-words italic leading-relaxed text-[var(--foreground)]">
           “{letter.message}”
         </p>
       </div>
@@ -40,7 +40,7 @@ export default function LetterCard({
           type="button"
           disabled={isPending}
           onClick={() => onDelete(letter.id)}
-          className="text-right text-[var(--muted)] opacity-0 transition-opacity hover:text-[var(--accent)] group-hover:opacity-100 disabled:opacity-50"
+          className="text-right text-[var(--muted)] opacity-100 transition-opacity hover:text-[var(--accent)] disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100"
         >
           Delete
         </button>

@@ -106,7 +106,7 @@ export default function ReportsList({
                   </span>{" "}
                   · sent {formatDate(group.letter.created_at)}
                 </p>
-                <p className="font-serif-brand mt-1.5 italic leading-relaxed text-[var(--foreground)]">
+                <p className="font-serif-brand mt-1.5 break-words italic leading-relaxed text-[var(--foreground)]">
                   “{group.letter.message}”
                 </p>
               </div>
@@ -133,11 +133,11 @@ export default function ReportsList({
               {group.reports.map((report) => (
                 <li
                   key={report.id}
-                  className="flex items-center justify-between gap-4 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm"
                 >
-                  <p className="text-[var(--foreground)]">
+                  <p className="min-w-0 break-words text-[var(--foreground)]">
                     {report.reason}
-                    <span className="ml-2 text-[var(--muted)]">
+                    <span className="ml-2 whitespace-nowrap text-[var(--muted)]">
                       {formatDateTime(report.created_at)}
                     </span>
                   </p>

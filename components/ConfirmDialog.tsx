@@ -43,12 +43,12 @@ export default function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 sm:px-6"
       onClick={onCancel}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-lg border border-[var(--border)] bg-[var(--background)] p-6 shadow-lg"
+        className="w-full max-w-sm rounded-lg border border-[var(--border)] bg-[var(--background)] p-5 shadow-lg sm:p-6"
       >
         <h2
           id="confirm-dialog-title"
@@ -63,7 +63,7 @@ export default function ConfirmDialog({
           </p>
         )}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onCancel}

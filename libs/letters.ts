@@ -8,6 +8,11 @@ export type AdminLetter = {
   reportCount: number;
 };
 
+export type FooterLetter = {
+  to_name: string;
+  message: string;
+};
+
 /**
  * Fetches every letter with how many open reports it has. Uses the
  * admin client for both queries — `reports` has no SELECT policy for
@@ -47,6 +52,29 @@ export async function getLetters(): Promise<AdminLetter[]> {
     ...letter,
     reportCount: counts.get(letter.id) ?? 0,
   }));
+}
+
+/**
+ * Fetches the single letter with the highest `felt_count` — shown in the
+ * sidebar footer. Returns null if the table is empty or the read fails,
+ * so callers can just hide the footer instead of crashing the layout.
+ */
+export async function getMostFeltLetter(): Promise<FooterLetter | null> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("letters")
+    .select("to_name, message")
+    .order("felt_count", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch most-felt letter:", error.message);
+    return null;
+  }
+
+  return data;
 }
 
 /**
