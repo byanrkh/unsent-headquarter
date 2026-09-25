@@ -1,4 +1,4 @@
-import { createClient } from "@/libs/supabase/server";
+import { createAdminClient } from "@/libs/supabase/admin";
 
 export type ReportRow = {
   id: string;
@@ -37,7 +37,7 @@ type ReportJoinRow = {
  * Most-reported letters are surfaced first.
  */
 export async function getReportedLetters(): Promise<ReportedLetterGroup[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("reports")

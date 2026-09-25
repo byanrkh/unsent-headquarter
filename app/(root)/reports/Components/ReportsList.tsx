@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { FlagIcon } from "@/components/Icons";
+import { useConfirm } from "@/components/ConfirmProvider";
 import type { ReportedLetterGroup } from "@/libs/reports";
 import { dismissReport, deleteLetter } from "../actions";
 
@@ -29,6 +30,7 @@ export default function ReportsList({
   const [groups, setGroups] = useState(initialGroups);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   function handleDismiss(letterId: string, reportId: string) {
     setError(null);
@@ -56,10 +58,13 @@ export default function ReportsList({
     });
   }
 
-  function handleDeleteLetter(letterId: string) {
-    const confirmed = window.confirm(
-      "Delete this letter permanently? This also clears all of its reports and can't be undone.",
-    );
+  async function handleDeleteLetter(letterId: string) {
+    const confirmed = await confirm({
+      title: "Delete this letter?",
+      description: "This also clears all of its reports. This can't be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
     if (!confirmed) return;
 
     setError(null);

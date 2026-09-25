@@ -1,8 +1,5 @@
-"use client";
-
-import { useState } from "react";
-import { HeartIcon, FlagIcon } from "@/components/Icons";
-import type { AdminLetter } from "@/libs/mockLetters";
+import { FlagIcon } from "@/components/Icons";
+import type { AdminLetter } from "@/libs/letters";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -11,19 +8,20 @@ function formatDate(iso: string) {
   });
 }
 
-export default function LetterCard({ letter }: { letter: AdminLetter }) {
-  const [status, setStatus] = useState(letter.status);
-  const hidden = status === "hidden";
-
+export default function LetterCard({
+  letter,
+  isPending,
+  onDelete,
+}: {
+  letter: AdminLetter;
+  isPending: boolean;
+  onDelete: (letterId: string) => void;
+}) {
   return (
-    <li
-      className={`group flex flex-col gap-3 py-6 transition-opacity sm:flex-row sm:items-start sm:justify-between sm:gap-6 ${
-        hidden ? "opacity-50" : ""
-      }`}
-    >
+    <li className="group flex flex-col gap-3 py-6 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
       <div className="min-w-0 flex-1">
         <p className="text-sm text-[var(--muted)]">
-          to <span className="text-[var(--foreground)]">{letter.to}</span>
+          to <span className="text-[var(--foreground)]">{letter.to_name}</span>
         </p>
         <p className="font-serif-brand mt-1.5 italic leading-relaxed text-[var(--foreground)]">
           “{letter.message}”
@@ -31,23 +29,20 @@ export default function LetterCard({ letter }: { letter: AdminLetter }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-5 text-sm text-[var(--muted)]">
-        <span className="flex items-center gap-1">
-          <HeartIcon />
-          {letter.feltCount}
-        </span>
         {letter.reportCount > 0 && (
           <span className="flex items-center gap-1 text-[var(--accent)]">
             <FlagIcon />
             {letter.reportCount}
           </span>
         )}
-        <span className="w-12 text-right">{formatDate(letter.createdAt)}</span>
+        <span className="w-12 text-right">{formatDate(letter.created_at)}</span>
         <button
           type="button"
-          onClick={() => setStatus(hidden ? "visible" : "hidden")}
-          className="w-14 text-right text-[var(--muted)] opacity-0 transition-opacity hover:text-[var(--accent)] group-hover:opacity-100"
+          disabled={isPending}
+          onClick={() => onDelete(letter.id)}
+          className="text-right text-[var(--muted)] opacity-0 transition-opacity hover:text-[var(--accent)] group-hover:opacity-100 disabled:opacity-50"
         >
-          {hidden ? "Unhide" : "Hide"}
+          Delete
         </button>
       </div>
     </li>

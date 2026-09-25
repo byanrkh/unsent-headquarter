@@ -1,37 +1,69 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { SearchIcon } from "@/components/Icons";
-import { mockLetters } from "@/libs/mockLetters";
+import { useConfirm } from "@/components/ConfirmProvider";
+import type { AdminLetter } from "@/libs/letters";
+import { deleteLetter } from "../actions";
 import LetterCard from "./LetterCard";
 
-type Filter = "all" | "reported" | "hidden";
+type Filter = "all" | "reported";
 
 const FILTERS: { label: string; value: Filter }[] = [
   { label: "All", value: "all" },
   { label: "Reported", value: "reported" },
-  { label: "Hidden", value: "hidden" },
 ];
 
-export default function LettersList() {
+export default function LettersList({
+  initialLetters,
+}: {
+  initialLetters: AdminLetter[];
+}) {
+  const [letters, setLetters] = useState(initialLetters);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const confirm = useConfirm();
 
-  const letters = useMemo(() => {
-    return mockLetters.filter((letter) => {
+  const visible = useMemo(() => {
+    return letters.filter((letter) => {
       const matchesQuery =
         query.trim() === "" ||
-        letter.to.toLowerCase().includes(query.toLowerCase()) ||
+        letter.to_name.toLowerCase().includes(query.toLowerCase()) ||
         letter.message.toLowerCase().includes(query.toLowerCase());
 
-      const matchesFilter =
-        filter === "all" ||
-        (filter === "reported" && letter.reportCount > 0) ||
-        (filter === "hidden" && letter.status === "hidden");
+      const matchesFilter = filter === "all" || letter.reportCount > 0;
 
       return matchesQuery && matchesFilter;
     });
-  }, [query, filter]);
+  }, [letters, query, filter]);
+
+  async function handleDelete(letterId: string) {
+    const confirmed = await confirm({
+      title: "Delete this letter?",
+      description: "This also clears any reports on it. This can't be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    setError(null);
+    const prev = letters;
+
+    setLetters((current) => current.filter((l) => l.id !== letterId));
+
+    startTransition(async () => {
+      try {
+        await deleteLetter(letterId);
+      } catch {
+        setLetters(prev); // revert kalau gagal
+        setError("Couldn't delete that letter — try again.");
+      }
+    });
+  }
+
+  const reportedCount = letters.filter((l) => l.reportCount > 0).length;
 
   return (
     <div>
@@ -52,26 +84,38 @@ export default function LettersList() {
               key={f.value}
               type="button"
               onClick={() => setFilter(f.value)}
-              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors ${
                 filter === f.value
                   ? "bg-[var(--surface)] text-[var(--foreground)]"
                   : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
               {f.label}
+              {f.value === "reported" && reportedCount > 0 && (
+                <span className="text-[var(--accent)]">{reportedCount}</span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      {letters.length === 0 ? (
+      {error && <p className="mt-4 text-sm text-[var(--accent)]">{error}</p>}
+
+      {visible.length === 0 ? (
         <p className="mt-10 text-sm text-[var(--muted)]">
-          Nothing matches that search.
+          {letters.length === 0
+            ? "No letters yet."
+            : "Nothing matches that search."}
         </p>
       ) : (
         <ul className="mt-4 divide-y divide-[var(--border)] border-t border-[var(--border)]">
-          {letters.map((letter) => (
-            <LetterCard key={letter.id} letter={letter} />
+          {visible.map((letter) => (
+            <LetterCard
+              key={letter.id}
+              letter={letter}
+              isPending={isPending}
+              onDelete={handleDelete}
+            />
           ))}
         </ul>
       )}
