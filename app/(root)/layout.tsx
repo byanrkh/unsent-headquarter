@@ -1,9 +1,8 @@
 import Sidebar from "@/components/Sidebar";
 import ConfirmProvider from "@/components/ConfirmProvider";
 import { getMostFeltLetter } from "@/libs/letters";
+import { getPendingReportsCount } from "@/libs/reports";
 
-// Sidebar footer reads via the admin client (no cookies() call), so force
-// dynamic rendering here too — same reasoning as /letters and /reports.
 export const dynamic = "force-dynamic";
 
 export default async function RootGroupLayout({
@@ -11,12 +10,18 @@ export default async function RootGroupLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const footerLetter = await getMostFeltLetter();
+  const [footerLetter, pendingReportsCount] = await Promise.all([
+    getMostFeltLetter(),
+    getPendingReportsCount(),
+  ]);
 
   return (
     <ConfirmProvider>
       <div className="flex min-h-screen flex-col md:flex-row">
-        <Sidebar footerLetter={footerLetter} />
+        <Sidebar
+          footerLetter={footerLetter}
+          pendingReportsCount={pendingReportsCount}
+        />
         <div className="min-w-0 flex-1">{children}</div>
       </div>
     </ConfirmProvider>

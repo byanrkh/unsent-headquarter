@@ -88,3 +88,27 @@ export async function getReportedLetters(): Promise<ReportedLetterGroup[]> {
     (a, b) => b.reports.length - a.reports.length,
   );
 }
+
+export async function getPendingReportsCount(): Promise<number> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("reports")
+    .select("letters ( id )")
+    .returns<{ letters: { id: string } | null }[]>();
+
+  if (error) {
+    console.error("Failed to count pending reports:", error.message);
+    return 0;
+  }
+
+  // Dedupe by letter id — satu surat bisa dilaporkan lebih dari sekali,
+  // tapi cuma dihitung sekali di badge.
+  const letterIds = new Set(
+    (data ?? [])
+      .map((row) => row.letters?.id)
+      .filter((id): id is string => Boolean(id)),
+  );
+
+  return letterIds.size;
+}

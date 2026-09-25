@@ -23,8 +23,10 @@ function FooterQuote({ letter }: { letter: FooterLetter }) {
 
 export default function Sidebar({
   footerLetter,
+  pendingReportsCount,
 }: {
   footerLetter: FooterLetter | null;
+  pendingReportsCount: number;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -119,6 +121,11 @@ export default function Sidebar({
                   >
                     {item.label}
                   </span>
+                  {item.href === "/reports" && pendingReportsCount > 0 && (
+                    <span className="ml-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-medium text-white">
+                      {pendingReportsCount > 9 ? "9+" : pendingReportsCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -165,6 +172,11 @@ export default function Sidebar({
                   >
                     {item.label}
                   </span>
+                  {item.href === "/reports" && pendingReportsCount > 0 && (
+                    <span className="ml-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-medium text-white">
+                      {pendingReportsCount > 9 ? "9+" : pendingReportsCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
